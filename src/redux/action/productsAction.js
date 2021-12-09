@@ -50,7 +50,6 @@ export const getProductsAction = (search, min, max) => {
                 }
             }
 
-
             // cara2
             // response = await axios.get(`${API_URL}/products${search ? `?nama=${search}` : ``}`)   
 
@@ -60,6 +59,22 @@ export const getProductsAction = (search, min, max) => {
             })
         } catch (error) {
             console.log(error)
+        }
+    }
+}
+
+export const getProductsSort = (sort) => {
+    return async (dispatch) => {
+        try {
+            
+            let res = await axios.get(`${API_URL}/products?_sort=${sort.field}&_order=${sort.sortType}`)
+
+            dispatch({
+                type: "GET_DATA_PRODUCTS",
+                payload: res.data
+            })
+        } catch (error) {
+            
         }
     }
 }

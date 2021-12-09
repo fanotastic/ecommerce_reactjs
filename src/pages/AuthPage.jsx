@@ -3,7 +3,7 @@ import React from 'react';
 import { Container, FormGroup, Input, Label, Button, InputGroupText, InputGroup, Toast, ToastHeader, ToastBody, } from 'reactstrap';
 import { loginAction } from '../redux/action'
 import { connect } from 'react-redux' // utk menghubungkan fungsi action dgn fungsi reducer
-
+import { Navigate } from 'react-router-dom';
 
 const API_URL = "http://localhost:2000"
 
@@ -71,7 +71,8 @@ class AuthPage extends React.Component {
                         email: this.emailReg.value,
                         password: this.passwordReg.value,
                         role: "user",
-                        status: "Active"
+                        status: "Active",
+                        cart: []
                     }).then((response) => {
                         console.log(response)
                         this.setState({
@@ -104,6 +105,10 @@ class AuthPage extends React.Component {
 
 
     render() {
+        if (this.props.iduser) {
+            // redirect ke page yang dituju
+            return <Navigate to="/" />
+        }
         return (
             <Container className="p-5">
                 <div>
@@ -180,4 +185,10 @@ class AuthPage extends React.Component {
     }
 }
 
-export default connect(null, { loginAction })(AuthPage);
+const mapToProps = (state) => {
+    return {
+        iduser: state.userReducer.id
+    }
+}
+
+export default connect(mapToProps, { loginAction })(AuthPage);

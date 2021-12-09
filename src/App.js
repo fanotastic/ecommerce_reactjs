@@ -1,5 +1,4 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import AuthPage from './pages/AuthPage';
 import NavbarComponent from './components/Navbar';
@@ -12,6 +11,10 @@ import { loginAction, getProductsAction } from './redux/action'
 import ProductsPage from './pages/ProductPage';
 import { API_URL } from './helper';
 import ProductDetail from './pages/ProductDetail';
+import CartPage from './pages/CartPage';
+import NotFoundPage from './pages/NotFound';
+import TransactionAdminPage from './pages/TransactionManagement';
+import HistoryPage from './pages/HistoryPage';
 
 class App extends React.Component {
   constructor(props) {
@@ -76,13 +79,38 @@ class App extends React.Component {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/auth-page" element={<AuthPage />} />
-          <Route path="/product-management" element={<ProductManagement />} />
           <Route path="/product-page" element={<ProductsPage />} />
           <Route path="/product-detail" element={<ProductDetail />} />
+
+          {
+            this.props.role == "user" ?
+              <>
+                <Route path="/cart-user" element={<CartPage />} />
+                <Route path="/history-user" element={<HistoryPage />} />
+              </>
+              :
+              this.props.role == "admin" ?
+                <>
+                  <Route path="/product-management" element={<ProductManagement />} />
+                  <Route path="/transaction-management" element={<TransactionAdminPage />} />
+                </>
+                :
+                <Route path="*" element={<NotFoundPage />} />
+
+          }
+
+          <Route path="*" element={<NotFoundPage />} />
+
         </Routes>
       </div>
     );
   }
 }
 
-export default connect(null, { loginAction, getProductsAction })(App);
+const mapToProps = (state) => {
+  return {
+    role: state.userReducer.role
+  }
+}
+
+export default connect(mapToProps, { loginAction, getProductsAction })(App);

@@ -1,12 +1,15 @@
 import React from 'react';
-import { Modal, ModalHeader, ModalBody, FormGroup, Label, Input, ModalFooter, Button, Row, Col } from 'reactstrap';
-
+import axios from 'axios';
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter, FormGroup, Label, Input, Row, Col } from 'reactstrap';
+import { API_URL } from '../helper'
+import { getProductsAction } from '../redux/action';
+import { connect } from 'react-redux';
 class ModalEditProduct extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            stock: props.detailProduk.stock,
-            images: props.detailProduk.images,
+            stock: [],
+            images: [],
             edit: false
         }
     }
@@ -37,22 +40,54 @@ class ModalEditProduct extends React.Component {
         }
     }
 
+    btSave = () => {
+        let data = {
+            nama: this.inNama.value,
+            brand: this.inBrand.value,
+            kategori: this.inKategori.value,
+            deskripsi: this.inDeskripsi.value,
+            harga: this.inHarga.value,
+            stock: this.state.stock.length == 0 ? this.props.detailProduk.stock : this.state.stock,
+            images: this.state.images.length == 0 ? this.props.detailProduk.images : this.state.images
+        }
+        console.log("TESTING SAVE :", data)
+        axios.patch(`${API_URL}/products/${this.props.detailProduk.id}`, data)
+            .then((res) => {
+                this.props.getProductsAction();
+                this.props.btClose()
+                this.setState({ stock: [], images: [], edit: !this.state.edit })
+            }).catch((err) => {
+                console.log(err)
+            })
+    }
+
+    handleImages = (e, index) => {
+        let temp = [...this.props.detailProduk.images]
+        temp[index] = e.target.value
+        this.setState({ images: temp })
+    }
+
+    handleType = (e, index) => {
+        let temp = [...this.props.detailProduk.stock];
+        temp[index].type = e.target.value
+        this.setState({ stock: temp })
+    }
+
+    handleStock = (e, index) => {
+        let temp = [...this.props.detailProduk.stock];
+        temp[index].stock = e.target.value
+        this.setState({ stock: temp })
+    }
+
     render() {
         let { nama, deskripsi, brand, kategori, harga } = this.props.detailProduk
         return (
-
-            // toggle itu semacam onClick jd isinya harus function
-            // toggle itu lambang silang yg diatas utk close
-            // disabled itu supaya input nya tidak bs diganti dan nilainya boolean (default: false)
-            // this.state.edit --> itu utk ganti state edit yg tdnya default false
-
             <Modal isOpen={this.props.modalOpen} toggle={this.props.btClose} >
                 <ModalHeader toggle={this.props.btClose}>Detail Product</ModalHeader>
                 <ModalBody>
                     <FormGroup>
                         <Label for="textNama">Nama Product</Label>
-                        <Input disabled={!this.state.edit} type="text" id="textNama" defaultValue={nama}
-                            innerRef={(element) => { this.textNama = element }} />
+                        <Input disabled={!this.state.edit} type="text" id="textNama" defaultValue={nama} innerRef={elemen => this.inNama = elemen} />
                     </FormGroup>
                     <FormGroup>
                         <Label for="textDes">Deskripsi</Label>
@@ -88,7 +123,7 @@ class ModalEditProduct extends React.Component {
                 <ModalFooter>
                     {
                         this.state.edit ?
-                            <Button type="button" color="primary" onClick={() => this.setState({ edit: !this.state.edit })}>Save</Button>
+                            <Button type="button" color="primary" onClick={this.btSave}>Save</Button>
                             : <Button type="button" color="primary" onClick={() => this.setState({ edit: !this.state.edit })}>Edit</Button>
                     }
                     <Button color="secondary" onClick={() => {
@@ -101,4 +136,4 @@ class ModalEditProduct extends React.Component {
     }
 }
 
-export default ModalEditProduct;
+export default connect(null, { getProductsAction })(ModalEditProduct);

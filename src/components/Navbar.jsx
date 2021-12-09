@@ -50,12 +50,12 @@ class NavbarComponent extends React.Component {
                                             ?
                                             <DropdownMenu right>
                                                 <DropdownItem>
-                                                    <Link to="" style={{ color: "#2d3436", textDecoration: "none" }}>
+                                                    <Link to="/cart-user" style={{ color: "#2d3436", textDecoration: "none" }}>
                                                         Cart
                                                     </Link>
                                                 </DropdownItem>
                                                 <DropdownItem>
-                                                    <Link to="" style={{ color: "#2d3436", textDecoration: "none" }}>
+                                                    <Link to="/history-user" style={{ color: "#2d3436", textDecoration: "none" }}>
                                                         Transactions
                                                     </Link>
                                                 </DropdownItem>
@@ -80,7 +80,7 @@ class NavbarComponent extends React.Component {
                                                     </Link>
                                                 </DropdownItem>
                                                 <DropdownItem>
-                                                    <Link to="/product-management" style={{ color: "#2d3436" }} className="nav-link">
+                                                    <Link to="/transaction-management" style={{ color: "#2d3436" }} className="nav-link">
                                                         Transactions Management
                                                     </Link>
                                                 </DropdownItem>

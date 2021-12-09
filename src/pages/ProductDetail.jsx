@@ -1,8 +1,10 @@
 import axios from 'axios';
 import React from 'react';
-import { Button, Collapse, Input, Toast, ToastHeader, ToastBody } from 'reactstrap';
+import { connect } from 'react-redux';
+import { Button, Collapse, Input, Toast, ToastBody, ToastHeader } from 'reactstrap';
 import { API_URL } from '../helper';
-
+import { updateUserCart } from '../redux/action';
+import { Navigate } from 'react-router-dom'
 class ProductDetail extends React.Component {
     constructor(props) {
         super(props);
@@ -12,10 +14,9 @@ class ProductDetail extends React.Component {
             openType: false,
             qty: 1,
             selectedType: {},
-            toastOpen: "",
-            toastHeader: "",
-            toastMessage: "",
-            toastIcon: ""
+            toastOpen: false,
+            toastMsg: "",
+            redirect: false
         }
     }
 
@@ -44,118 +45,135 @@ class ProductDetail extends React.Component {
         })
     }
 
+    onBtDec = () => {
+        if (this.state.qty > 1) {
+            this.setState({ qty: this.state.qty -= 1 })
+        }
+    }
+
     onBtInc = () => {
-        console.log(this.state.selectedType.qty)
-        if (this.state.selectedType.qty == undefined) {
-            this.setState({
-                toastOpen: true,
-                toastHeader: "Add to cart warning",
-                toastIcon: "warning",
-                toastMessage: "Pilih type stock"
-            })
-        } else {
+        if (this.state.selectedType.qty) {
             if (this.state.qty < this.state.selectedType.qty) {
-                this.setState({
-                    qty: this.state.qty += 1
-                });
+                this.setState({ qty: this.state.qty += 1 })
             } else {
-                this.setState({
-                    toastOpen: true,
-                    toastHeader: "Add to cart warning",
-                    toastIcon: "warning",
-                    toastMessage: "Stok produk tidak cukup"
-                })
+                this.setState({ toastOpen: !this.state.toastOpen, toastMsg: "Stok produk tidak cukup" })
             }
         }
     }
 
-    onBtDec = () => {
-        if (this.state.qty > 1) {
-            this.setState({ qty: this.state.qty -= 1 })
+    onBtAddToCart = async () => {
+        let { selectedType, detail, qty } = this.state
+        if (selectedType.type) {
+            let dataCart = {
+                image: detail.images[0],
+                nama: detail.nama,
+                brand: detail.brand,
+                harga: detail.harga,
+                type: selectedType.type,
+                qty
+            }
+
+            // menggabungkan data cart sebelumnya dari reducer, dengan dataCart baru yg akan ditambahkan
+            let temp = [...this.props.cart];
+            temp.push(dataCart);
+
+            if (this.props.iduser) {
+                let res = await this.props.updateUserCart(temp, this.props.iduser);
+                if (res.success) {
+                    this.setState({ redirect: true })
+                }
+            } else {
+                this.setState({ toastOpen: !this.state.toastOpen, toastMsg: "Silahkan Login Terlebih Dahulu" })
+            }
+
         } else {
-            this.setState({
-                toastOpen: true,
-                toastHeader: "Add to cart warning",
-                toastIcon: "warning",
-                toastMessage: "Stok produk salah"
-            })
+            this.setState({ toastOpen: !this.state.toastOpen, toastMsg: "Pilih tipe produk terlebih dahulu" })
         }
     }
 
     render() {
-        // const search = this.props.location.search;
-        // alert(search)
+        if (this.state.redirect) {
+            return <Navigate to="/cart-user" />
+        }
         return (
-            <div className="container row p-5 m-auto shadow bg-white rounded mt-4">
+            <div>
                 <div>
-                    <Toast isOpen={this.state.toastOpen} style={{ position: "fixed" }}>
-                        <ToastHeader icon={this.state.toastIcon}
-                            toggle={() => this.setState({ toastOpen: false })}>
-                            {this.state.toastHeader}
+                    <Toast isOpen={this.state.toastOpen} style={{ position: "fixed", right: 10 }}>
+                        <ToastHeader icon="warning"
+                            toggle={() => this.setState({ toastOpen: false, toastMsg: "" })}>
+                            Add to cart warning
                         </ToastHeader>
                         <ToastBody>
-                            {this.state.toastMessage}
+                            {this.state.toastMsg}
                         </ToastBody>
                     </Toast>
                 </div>
-
-                {
-                    this.state.detail.id &&
-                    <>
-                        <div className="col-md-1">
-                            {this.renderImages()}
-                        </div>
-                        <div className="col-md-7 text-center">
-                            <img className="shadow-sm bg-white rounded" src={this.state.detail.images[this.state.thumbnail]} width="80%" />
-                        </div>
-                        <div className="col-md-4">
-                            <div style={{ borderBottom: '1.5px solid gray' }}>
-                                <h4 style={{ fontWeight: 'bolder' }}>{this.state.detail.nama}</h4>
-                                <h6 className="text-mute">{this.state.detail.kategori}</h6>
-                                <h2 style={{ fontWeight: 'bolder' }}>Rp {this.state.detail.harga.toLocaleString()}</h2>
+                <div className="container row p-5 m-auto shadow bg-white rounded mt-4">
+                    {
+                        this.state.detail.id &&
+                        <>
+                            <div className="col-md-1">
+                                {this.renderImages()}
                             </div>
-                            <div style={{ borderBottom: '1.5px solid gray' }}>
-                                <div
-                                    style={{ cursor: 'pointer', fontWeight: 'bold' }}
-                                    onClick={() => this.setState({ openType: !this.state.openType })}>
-                                    Type: {this.state.selectedType.type}</div>
-                                <Collapse isOpen={this.state.openType}>
-                                    {
-                                        this.state.detail.stock.map((item, index) => {
-                                            return (
-                                                <div>
-                                                    <Button outline color="secondary" size="sm"
-                                                        style={{ width: '100%', border: 'none', textAlign: 'left' }}
-                                                        onClick={() => this.setState({ selectedType: item, qty: 1 })}
-                                                    > {item.type} : {item.qty}</Button>
-                                                </div>
-                                            )
-                                        })
-                                    }
-                                </Collapse>
+                            <div className="col-md-7 text-center">
+                                <img className="shadow-sm bg-white rounded" src={this.state.detail.images[this.state.thumbnail]} width="80%" />
                             </div>
-                            <p className="my-3" style={{ textAlign: "justify" }}>
-                                {this.state.detail.deskripsi}
-                            </p>
-                            <div className="d-flex justify-content-between align-items-center mb-3">
-                                <span>Jumlah :</span>
-                                <span style={{ width: '30%', display: 'flex', alignItems: 'center' }}>
-                                    <span className="material-icons" style={{ cursor: 'pointer' }} onClick={this.onBtDec}>
-                                        remove
+                            <div className="col-md-4">
+                                <div style={{ borderBottom: '1.5px solid gray' }}>
+                                    <h4 style={{ fontWeight: 'bolder' }}>{this.state.detail.nama}</h4>
+                                    <h6 className="text-mute">{this.state.detail.kategori}</h6>
+                                    <h2 style={{ fontWeight: 'bolder' }}>Rp {this.state.detail.harga.toLocaleString()}</h2>
+                                </div>
+                                <div style={{ borderBottom: '1.5px solid gray' }}>
+                                    <div
+                                        style={{ cursor: 'pointer', fontWeight: 'bold' }}
+                                        onClick={() => this.setState({ openType: !this.state.openType })}>
+                                        Type: {this.state.selectedType.type}</div>
+                                    <Collapse isOpen={this.state.openType}>
+                                        {
+                                            this.state.detail.stock.map((item, index) => {
+                                                return (
+                                                    <div>
+                                                        <Button outline color="secondary" size="sm"
+                                                            style={{ width: '100%', border: 'none', textAlign: 'left' }}
+                                                            onClick={() => this.setState({ selectedType: item, qty: 1 })}
+                                                        > {item.type} : {item.qty}</Button>
+                                                    </div>
+                                                )
+                                            })
+                                        }
+                                    </Collapse>
+                                </div>
+                                <p className="my-3" style={{ textAlign: "justify" }}>
+                                    {this.state.detail.deskripsi}
+                                </p>
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                    <span>Jumlah :</span>
+                                    <span style={{ width: '30%', display: 'flex', alignItems: 'center' }}>
+                                        <span className="material-icons" style={{ cursor: 'pointer' }} onClick={this.onBtDec}>
+                                            remove
+                                        </span>
+                                        <Input size="sm" placeholder="qty" value={this.state.qty} style={{ width: "40%", display: 'inline-block' }} />
+                                        <span className="material-icons" style={{ cursor: 'pointer' }} onClick={this.onBtInc}>
+                                            add
+                                        </span>
                                     </span>
-                                    <Input size="sm" placeholder="qty" value={this.state.qty} style={{ width: "40%", display: 'inline-block' }} />
-                                    <span className="material-icons" style={{ cursor: 'pointer' }} onClick={this.onBtInc}>
-                                        add
-                                    </span>
-                                </span>
+                                </div>
+                                <Button type="button" color="warning" style={{ width: '100%' }} onClick={this.onBtAddToCart}>Add to cart</Button>
                             </div>
-                            <Button type="button" color="warning" style={{ width: '100%' }} onClick={this.onBtAddToCart}>Add to cart</Button>
-                        </div>
-                    </>
-                }
+                        </>
+                    }
+                </div>
             </div>
         );
     }
 }
 
-export default ProductDetail;
+const mapToProps = (state) => {
+    return {
+        cart: state.userReducer.cart,
+        iduser: state.userReducer.id
+    }
+}
+
+export default connect(mapToProps, { updateUserCart })(ProductDetail);
