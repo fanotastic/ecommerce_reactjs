@@ -39,17 +39,6 @@ class App extends React.Component {
         if (res.success) {
           this.setState({ loading: false })
         }
-
-        // sdh tidak dipakai :
-        // axios.get(`${API_URL}/users?email=${local.email}&password${local.password}`)
-        //   .then((res) => {
-        //     console.log("keepLogin berhasil ==>", res.data)
-        //     this.props.loginAction(res.data[0])
-        //     this.setState({ loading: false })
-        //   }).catch((err) => {
-        //     console.log(err)
-        //   })
-
       } else {
         this.setState({ loading: false })
       }

@@ -7,21 +7,24 @@ const INITIAL_STATE = {
     cart: []
 }
 
-
+// userReducer punya 2 parameter, 1 itu state, 2 itu action
+// userReducer = (state, action) => {}
 // Func userReducer: utk mereturn data dari action.payload agar dapat disimpan oleh STATE REDUCER
+// SWITCH...CASE : digunakan untuk menentukan data dari action.payload untuk disimpah ke bagian STATE yang dituju berdasarkan action.type
+// case ibaratnya sama dengan if (action.type == "LOGIN SUCCESS")
 export const userReducer = (state = INITIAL_STATE, action) => {
-    // SWITCH...CASE : digunakan untuk menentukan data dari action.payload untuk disimpah ke bagian STATE yang dituju berdasarkan action.type
     switch (action.type) {
         case "LOGIN_SUCCESS":
             console.log("DATA DARI ACTION PAYLOAD", action.payload)
             return {
                 ...state,
-                id: action.payload.id,
-                username: action.payload.username,
-                email: action.payload.email,
-                role: action.payload.role,
-                status: action.payload.status,
-                cart: action.payload.cart
+                ...action.payload
+                // id: action.payload.id,
+                // username: action.payload.username,
+                // email: action.payload.email,
+                // role: action.payload.role,
+                // status: action.payload.status,
+                // cart: action.payload.cart
             }
         case "UPDATE_CART_USER":
             console.log("cart ambil", action.payload)

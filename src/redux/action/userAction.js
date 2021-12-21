@@ -2,31 +2,16 @@ import axios from "axios"
 import { API_URL } from "../../helper"
 
 export const loginAction = (email, password) => {
-    // cara 1
-    // return (dispatch) => {
-    //     axios.get(`${API_URL}/users?email=${email}&password=${password}`)
-    //         .then((response) => {
-    //             if (response.data.length > 0) {
-    //                 localStorage.setItem("data", JSON.stringify(response.data[0]))
-    //                 // dispatch : meneruskan data kereducer
-    //                 dispatch({
-    //                     type: "LOGIN_SUCCESS",
-    //                     payload: response.data[0]
-    //                 })
-    //             }
-    //         }).catch((err) => {
-    //             console.log(err)
-    //         })
-    // }
-
-    // cara 2
     return async (dispatch) => {
         try {
 
             let response = await axios.get(`${API_URL}/users?email=${email}&password=${password}`)
             if (response.data.length > 0) {
+                console.log("ini data", response.data[0])
                 localStorage.setItem("data", JSON.stringify(response.data[0]))
                 // dispatch : meneruskan data kereducer
+                // JSON.stringify itu object json nya jadi string
+                // kenapa harus string? karna penyimpanan pada browser itu data nya hanya bisa string
                 dispatch({
                     type: "LOGIN_SUCCESS",
                     payload: response.data[0]

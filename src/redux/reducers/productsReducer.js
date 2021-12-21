@@ -1,3 +1,5 @@
+// INITIAL_STATE pasti datanya object
+
 const INITIAL_STATE = {
     productsList: []
 }

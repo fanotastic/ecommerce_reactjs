@@ -4,6 +4,7 @@ import { API_URL } from '../helper';
 import { connect } from 'react-redux';
 import { Badge, Button } from 'reactstrap';
 import ModalTransaksi from '../components/ModalTransaksi';
+
 class HistoryPage extends React.Component {
     constructor(props) {
         super(props);

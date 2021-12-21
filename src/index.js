@@ -11,8 +11,10 @@ import { rootReducers } from './redux/reducers';
 import ReduxThunk from 'redux-thunk';
 
 const globalStore = createStore(rootReducers, {}, applyMiddleware(ReduxThunk))
+// setelah rootReducers ada {} itu utk mengosongkan parameter kedua agar reduxthunk jd parameter ke3
 ReactDOM.render(
-  <Provider store={globalStore}>
+  <Provider store={globalStore}> 
+  {/* store ini seperti gudangnya/warehouse */}
     <BrowserRouter>
       <App />
     </BrowserRouter>
